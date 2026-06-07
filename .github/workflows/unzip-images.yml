@@ -1,0 +1,45 @@
+name: Unzip NFT Images Collection
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unzip-process:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Images Directory
+        run: mkdir -p images
+
+      - name: Unzip All Parts
+        run: |
+          echo "Starting the unzipping process..."
+          for i in {1..7}
+          do
+            if [ -f "part$i.zip" ]; then
+              echo "Unzipping part$i.zip into images folder..."
+              unzip -o "part$i.zip" -d images/
+            else
+              echo "part$i.zip not found, skipping."
+            fi
+          done
+
+      - name: Clean Up Zip Files
+        run: |
+          echo "Cleaning up zip files to save space..."
+          rm -f part*.zip
+
+      - name: Commit and Push Unzipped Images
+        run: |
+          git config --global user.name "darkpunksnft"
+          git config --global user.email "darkpunksnft@users.noreply.github.com"
+          
+          git add images/
+          git commit -am "Deploy unzipped NFT images collection [Part 1-7]"
+          git push origin main
